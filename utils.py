@@ -36,6 +36,8 @@ def authenticate_user(fake_db: MongoClient, username: str, password: str):
         return False
     if not verify_password(password+PEPPER, user.hashed_password):
         return False
+    if user.disabled:
+        return "Disabled"
     return user
 
 

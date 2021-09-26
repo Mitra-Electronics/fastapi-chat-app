@@ -4,7 +4,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from config import ACCESS_TOKEN_EXPIRE_MINUTES
+from config import ACCESS_TOKEN_EXPIRE_MINUTES, TOKEN_URL
 from schemas import Token, UserSignup
 from utils import *
 
@@ -14,9 +14,9 @@ app = FastAPI()
 # openssl rand -hex 32
 
 
-@app.post("/login", response_model=Token)
+@app.post("/"+TOKEN_URL, response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-
+    """Login"""
     user = authenticate_user(
         fake_users_db__, form_data.username, form_data.password)
     if not user:
@@ -26,6 +26,12 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
 
+        )
+    if user == 'Disabled':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is disabled",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

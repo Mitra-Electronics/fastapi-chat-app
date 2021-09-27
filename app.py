@@ -62,11 +62,9 @@ async def login_for_access_token(form_data: UserLogin):
             detail="User is disabled",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
-    access_token_expires = ACCESS_TOKEN_EXPIRE_MINUTES
     access_token = create_access_token(
 
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.username}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
 
     )
 

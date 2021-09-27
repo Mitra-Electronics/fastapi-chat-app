@@ -1,5 +1,7 @@
 from datetime import timedelta
 
+from fastapi import HTTPException
+
 SECRET_KEY = "b9ae2698ad9ba101e6d91f57bb883ec2723fa88a183c72d24f7b9f783c43a56476ab71abfb7905eaf543fc0290cbe30ecb5d002ced2aa94aadb702921f403ee4"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = timedelta(minutes=60 * 7)
@@ -12,3 +14,9 @@ SCHEMES = ["bcrypt"]
 DEPRECATED = "auto"
 LOGIN_FORM_TITLE = "Login form"
 USER_DISABLED_TEXT = "Disabled"
+CREDENTIALS_EXCEPTION = HTTPException(
+    status_code=401,
+    detail="Could not validate credentials",
+    headers={"WWW-Authenticate": "Bearer"},
+)
+INACTIVE_EXCEPTION = HTTPException(status_code=400, detail="Inactive user")

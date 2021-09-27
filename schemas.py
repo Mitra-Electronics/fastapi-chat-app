@@ -22,5 +22,13 @@ class UserSignup(User):
     password: str
 
 
+class UpdatePassword(BaseModel):
+    password: str
+
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
 class UserInDB(User):
     hashed_password: str

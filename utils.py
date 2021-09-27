@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -6,13 +7,15 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pymongo import MongoClient
 
-from config import ALGORITHM, PEPPER, SCHEMES, SECRET_KEY, TOKEN_URL, DEPRECATED
-from mongodb_driver import fake_users_db__
-from schemas import TokenData, User, UserInDB
+from config import (ALGORITHM, DEPRECATED, LOGIN_FORM_TITLE, PEPPER, SCHEMES,
+                    SECRET_KEY, TOKEN_TEST_URL, USER_DISABLED_TEXT)
+from mongodb_driver import fake_users_db__, insert__, update_password
+from schemas import TokenData, User, UserInDB, UserSignup
 
 pwd_context = CryptContext(schemes=SCHEMES, deprecated=DEPRECATED)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=TOKEN_URL)
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl=TOKEN_TEST_URL, scheme_name=LOGIN_FORM_TITLE)
 
 
 def verify_password(plain_password: str, hashed_password: str):
@@ -23,8 +26,12 @@ def get_password_hash(password: str):
     return pwd_context.hash(password)
 
 
-def get_user(db: MongoClient, username: str):
-    search = list(db.find({"username": username}))
+def get_user(db: MongoClient, username: str, email = None):
+    if email is None:
+        search = {"username": username}
+    else:
+        search = {"username": username, "email": email}
+    search = list(db.find(search))
     if search != []:
         user_dict = search[0]
         return UserInDB(**user_dict)
@@ -37,7 +44,7 @@ def authenticate_user(fake_db: MongoClient, username: str, password: str):
     if not verify_password(password+PEPPER, user.hashed_password):
         return False
     if user.disabled:
-        return "Disabled"
+        return USER_DISABLED_TEXT
     return user
 
 
@@ -75,24 +82,18 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     return current_user
 
 
-def register_user(fake_db: MongoClient, username: str, password: str, email: str, full_name: str) -> bool:
-    if not get_user(fake_db, username):
-        fake_db.insert_one({
-            "username": username,
-            "full_name": full_name,
-            "email": email,
-            "hashed_password": get_password_hash(password+PEPPER),
-            "disabled": False,
-        })
+def register_user(fake_db: MongoClient, user: UserSignup) -> bool:
+    if not get_user(fake_db, user.username, user.email):
+        insert__(user.username, get_password_hash(user.password+PEPPER), user.full_name, user.email)
         return True
     else:
         return False
 
 
-def change_password(fake_db: MongoClient, username: str, update_password: str):
+def change_password(fake_db: MongoClient, username: str,email: str, updated_password: str):
     if get_user(fake_db, username):
-        fake_db.update_one({"username": username}, {"$set": {"hashed_password": get_password_hash(
-            update_password+PEPPER)}})
+        update_password(username,email,get_password_hash(updated_password+PEPPER))
+        
         return True
     else:
         return False

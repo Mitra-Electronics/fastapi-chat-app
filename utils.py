@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 from config import (ALGORITHM, CREDENTIALS_EXCEPTION, DEPRECATED,
                     INACTIVE_EXCEPTION, LOGIN_FORM_TITLE, PEPPER, SCHEMES,
                     SECRET_KEY, TOKEN_TEST_URL, USER_DISABLED_TEXT)
-from mongodb_driver import fake_users_db__, insert__, update_password
+from mongodb_driver import delete, fake_users_db__, insert__, update_password
 from schemas import TokenData, User, UserInDB, UserSignup
 
 pwd_context = CryptContext(schemes=SCHEMES, deprecated=DEPRECATED)
@@ -95,5 +95,10 @@ def change_password(fake_db: fake_users_db__, username: str, email: str, updated
         return False
 
 
-def delete_user():
-    pass
+def delete_user(db: fake_users_db__, user: UserInDB):
+    if get_user(db, user.username, user.email):
+        delete(user)
+        return True
+    else:
+        return False
+

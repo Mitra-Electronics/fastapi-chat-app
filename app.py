@@ -1,13 +1,15 @@
 from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from config import (ACCESS_TOKEN_EXPIRE_MINUTES, TOKEN_TEST_URL, TOKEN_URL,
-                    USER_DISABLED_TEXT)
+from config import (ACCESS_TOKEN_EXPIRE_MINUTES, DESCRIPTION, DOCS_URL, NAME,
+                    OAUTH2_REDIRRECT_URL, OPENAPI_URL, REDOC_URL,
+                    TOKEN_TEST_URL, TOKEN_URL, USER_DISABLED_TEXT)
 from schemas import Token, UpdatePassword, UserLogin, UserSignup
 from utils import *
 
-app = FastAPI()
+app = FastAPI(docs_url=DOCS_URL, redoc_url=REDOC_URL, openapi_url=OPENAPI_URL,
+              swagger_ui_oauth2_redirect_url=OAUTH2_REDIRRECT_URL, title=NAME, description=DESCRIPTION)
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -51,7 +53,7 @@ async def login_for_access_token(form_data: UserLogin):
     if not user:
 
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
 
@@ -101,7 +103,7 @@ async def register_user_(user: UserSignup):
         return JSONResponse({"access_token": access_token, "token_type": "bearer"})
     else:
         raise HTTPException(
-            status_code=status.HTTP_306_RESERVED,
+            status_code=status.HTTP_226_IM_USED,
             detail="User already exists",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -122,9 +124,16 @@ async def change_password_of_user(update: UpdatePassword, current_user: User = D
 
 
 @app.post("/users/me/delete-user")
-async def delete_user(current_user: User = Depends(get_current_active_user)):
-    user_delete = 0
-    return JSONResponse({"status": "ok", "deleted": True})
+async def delete_user_(current_user: User = Depends(get_current_active_user)):
+    user_update = delete_user(fake_users_db__, current_user)
+    if user_update is True:
+        return JSONResponse({"status": "ok", "deleted": True})
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User does not exist",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 @app.get("/users/me/", response_model=User)
@@ -135,3 +144,8 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 @app.get("/users/me/items/")
 async def read_own_items(current_user: User = Depends(get_current_active_user)):
     return [{"item_id": "Foo", "owner": current_user.username}]
+
+
+@app.get('/')
+async def redirrect():
+    return RedirectResponse(DOCS_URL)

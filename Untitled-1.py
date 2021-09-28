@@ -2,6 +2,7 @@ import requests
 import threading
 from functools import lru_cache
 
+
 @lru_cache
 def request():
     while True:
@@ -11,6 +12,7 @@ def request():
         except ConnectionError:
             requests.get("https://www.youtube.com")
             print("Requested youtube")
+
 
 def main():
     t1 = threading.Thread(target=request)
@@ -37,6 +39,7 @@ def main():
     t10.start()
     t11.start()
     t12.start()
+
 
 if __name__ == '__main__':
     main()

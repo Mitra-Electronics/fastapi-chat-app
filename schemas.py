@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
 from typing import Optional
+
+from pydantic import BaseModel, EmailStr
 
 
 class Token(BaseModel):
@@ -29,6 +30,7 @@ class UpdatePassword(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
+
 
 class UserInDB(User):
     hashed_password: str

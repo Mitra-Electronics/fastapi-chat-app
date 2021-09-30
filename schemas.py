@@ -12,6 +12,11 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 
+class UserUpdate(BaseModel):
+    full_name: str
+    password: str
+
+
 class User(BaseModel):
     username: str
     email: EmailStr

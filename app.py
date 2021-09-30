@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from config import (ACCESS_TOKEN_EXPIRE_MINUTES, DESCRIPTION, DOCS_URL, NAME,
                     OAUTH2_REDIRRECT_URL, OPENAPI_URL, REDOC_URL,
                     TOKEN_TEST_URL, TOKEN_URL, USER_DISABLED_TEXT)
-from schemas import Token, UpdatePassword, UserLogin, UserSignup
+from schemas import Token, UpdatePassword, UserLogin, UserSignup, UserUpdate
 from utils import *
 
 app = FastAPI(docs_url=DOCS_URL, redoc_url=REDOC_URL, openapi_url=OPENAPI_URL,
@@ -121,6 +121,11 @@ async def change_password_of_user(update: UpdatePassword, current_user: User = D
             detail="User does not exist",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+@app.post("users/me/change")
+async def change_user(user: UserUpdate, current_user: User = Depends(get_current_active_user)):
+    pass
 
 
 @app.post("/users/me/delete-user")

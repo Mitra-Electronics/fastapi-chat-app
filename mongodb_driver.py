@@ -26,3 +26,7 @@ def update_password(username: str, email: str, password: str):
 def delete(user: User):
     fake_users_db__.delete_one(
         {"username": user.username, "email": user.email, "disabled": user.disabled, "full_name": user.full_name})
+
+def update_user_in_db(username: str, email: str, password: str):
+    fake_users_db__.update_one({"username": username, "email": email, "password":password},{
+                               "$set": {"hashed_password": password}})

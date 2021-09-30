@@ -123,9 +123,17 @@ async def change_password_of_user(update: UpdatePassword, current_user: User = D
         )
 
 
-@app.post("users/me/change")
+@app.post("/users/me/change")
 async def change_user(user: UserUpdate, current_user: User = Depends(get_current_active_user)):
-    pass
+    user_update = change_user_in_db(fake_users_db__, current_user.username, current_user.email, user.full_name, current_user.email)
+    if user_update is True:
+        return {"status": "ok", "updated": True}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User does not exist",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 @app.post("/users/me/delete-user")

@@ -14,7 +14,6 @@ class TokenData(BaseModel):
 
 class UserUpdate(BaseModel):
     full_name: str
-    password: str
 
 
 class User(BaseModel):

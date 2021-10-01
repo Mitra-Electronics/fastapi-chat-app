@@ -8,7 +8,7 @@ from config import (ACCESS_TOKEN_EXPIRE_MINUTES, DESCRIPTION, DOCS_URL, NAME,
 from schemas import Token, UpdatePassword, UserLogin, UserSignup, UserUpdate
 from utils import *
 
-app = FastAPI(docs_url=DOCS_URL, redoc_url=REDOC_URL, openapi_url=OPENAPI_URL,
+app = FastAPI(docs_url="/"+DOCS_URL, redoc_url="/"+REDOC_URL, openapi_url=OPENAPI_URL,
               swagger_ui_oauth2_redirect_url=OAUTH2_REDIRRECT_URL, title=NAME, description=DESCRIPTION)
 
 # to get a string like this run:
@@ -161,4 +161,4 @@ async def read_own_items(current_user: User = Depends(get_current_active_user)):
 
 @app.get('/')
 async def redirrect():
-    return RedirectResponse(DOCS_URL)
+    return RedirectResponse("/"+DOCS_URL)

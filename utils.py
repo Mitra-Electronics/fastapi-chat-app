@@ -4,12 +4,13 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from pydantic.networks import HttpUrl
 
 from config import (ALGORITHM, CREDENTIALS_EXCEPTION, DEPRECATED,
                     INACTIVE_EXCEPTION, LOGIN_FORM_TITLE, PEPPER, SCHEMES,
                     SECRET_KEY, TOKEN_TEST_URL, USER_DISABLED_TEXT)
-from mongodb_driver import delete, fake_users_db__, insert__, update_password, update_user_in_db__
-from schemas import TokenData, User, UserInDB, UserSignup
+from mongodb_driver import delete, fake_users_db__, insert__, update_password, update_user_in_db__, get_user
+from schemas import TokenData, User, UserInDB, UserSignup, UserUpdate
 
 pwd_context = CryptContext(schemes=SCHEMES, deprecated=DEPRECATED)
 
@@ -23,17 +24,6 @@ def verify_password(plain_password: str, hashed_password: str):
 
 def get_password_hash(password: str):
     return pwd_context.hash(password)
-
-
-def get_user(db: fake_users_db__, username: str, email=None):
-    if email is None:
-        search = {"username": username}
-    else:
-        search = {"username": username, "email": email}
-    search = list(db.find(search))
-    if search != []:
-        user_dict = search[0]
-        return UserInDB(**user_dict)
 
 
 def authenticate_user(fake_db: fake_users_db__, username: str, password: str):
@@ -76,10 +66,10 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     return current_user
 
 
-def register_user(fake_db: fake_users_db__, user: UserSignup) -> bool:
+def register_user(fake_db: fake_users_db__, user: UserSignup, url: HttpUrl,gender: str) -> bool:
     if not get_user(fake_db, user.username, user.email):
         insert__(user.username, get_password_hash(
-            user.password+PEPPER), user.full_name, user.email)
+            user.password+PEPPER), user.full_name, user.email, url, gender)
         return True
     else:
         return False
@@ -95,9 +85,9 @@ def change_password(fake_db: fake_users_db__, username: str, email: str, updated
         return False
 
 
-def change_user_in_db(fake_db: fake_users_db__, username: str, email: str, full_name: str, email2: str):
+def change_user_in_db(fake_db: fake_users_db__, username: str, email: str, update: UserUpdate):
     if get_user(fake_db, username, email):
-        update_user_in_db__(username, email, full_name, email2)
+        update_user_in_db__(username, email, update)
 
         return True
     else:
@@ -110,4 +100,3 @@ def delete_user(db: fake_users_db__, user: UserInDB):
         return True
     else:
         return False
-

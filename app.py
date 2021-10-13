@@ -1,16 +1,34 @@
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, UploadFile, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.param_functions import File
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
 
-from config import (ACCESS_TOKEN_EXPIRE_MINUTES, DESCRIPTION, DOCS_URL, NAME,
-                    OAUTH2_REDIRRECT_URL, OPENAPI_URL, REDOC_URL,
-                    TOKEN_TEST_URL, TOKEN_URL, USER_DISABLED_TEXT)
-from schemas import Token, UpdatePassword, UserLogin, UserSignup, UserUpdate
-from utils import *
+from cloudinary_driver import upload_pic
+from config import (ACCESS_TOKEN_EXPIRE_MINUTES, ALLOW_CREDENTIALS,
+                    DESCRIPTION, DOCS_URL, HEADERS, METHODS, NAME,
+                    OAUTH2_REDIRRECT_URL, OPENAPI_URL, ORIGINS, REDOC_URL,
+                    STATIC_DIR, STATIC_NAME, STATIC_URL, TOKEN_TEST_URL,
+                    TOKEN_URL, USER_DISABLED_TEXT, USERS_PREFIX)
+from schemas import Token, UserLogin, UserSignup
+from users_router import route
+from utils import (authenticate_user, create_access_token, fake_users_db__,
+                   register_user)
 
 app = FastAPI(docs_url="/"+DOCS_URL, redoc_url="/"+REDOC_URL, openapi_url=OPENAPI_URL,
               swagger_ui_oauth2_redirect_url=OAUTH2_REDIRRECT_URL, title=NAME, description=DESCRIPTION)
+app.mount(STATIC_URL, StaticFiles(directory=STATIC_DIR), name=STATIC_NAME)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ORIGINS,
+    allow_credentials=ALLOW_CREDENTIALS,
+    allow_methods=METHODS,
+    allow_headers=HEADERS,
+)
+
+app.include_router(route, prefix=USERS_PREFIX)
 # to get a string like this run:
 # openssl rand -hex 32
 
@@ -35,10 +53,9 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token_expires = ACCESS_TOKEN_EXPIRE_MINUTES
     access_token = create_access_token(
 
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.username}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
 
     )
 
@@ -76,7 +93,7 @@ async def login_for_access_token(form_data: UserLogin):
 @app.post("/register", response_model=Token)
 async def register_user_(user: UserSignup):
     user_create = register_user(
-        fake_users_db__, user)
+        fake_users_db__, user, user.profile_pic_url, user.gender)
     if user_create is True:
         user = authenticate_user(
             fake_users_db__, user.username, user.password)
@@ -95,9 +112,8 @@ async def register_user_(user: UserSignup):
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        access_token_expires = ACCESS_TOKEN_EXPIRE_MINUTES
         access_token = create_access_token(
-            data={"sub": user.username}, expires_delta=access_token_expires
+            data={"sub": user.username}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
         return JSONResponse({"access_token": access_token, "token_type": "bearer"})
@@ -109,54 +125,14 @@ async def register_user_(user: UserSignup):
         )
 
 
-@app.post("/users/me/change-password")
-async def change_password_of_user(update: UpdatePassword, current_user: User = Depends(get_current_active_user)):
-    user_update = change_password(
-        fake_users_db__, current_user.username, current_user.email, update.password)
-    if user_update is True:
-        return {"status": "ok", "updated": True}
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User does not exist",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+@app.get("/file", response_class=RedirectResponse)
+async def file_send():
+    return RedirectResponse("http://res.cloudinary.com/dyq1mevvs/image/upload/v1633674919/q5mexicgwoyj8xjduxca.jpg")
 
 
-@app.post("/users/me/change")
-async def change_user(user: UserUpdate, current_user: User = Depends(get_current_active_user)):
-    user_update = change_user_in_db(fake_users_db__, current_user.username, current_user.email, user.full_name, current_user.email)
-    if user_update is True:
-        return {"status": "ok", "updated": True}
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User does not exist",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-
-@app.post("/users/me/delete-user")
-async def delete_user_(current_user: User = Depends(get_current_active_user)):
-    user_update = delete_user(fake_users_db__, current_user)
-    if user_update is True:
-        return JSONResponse({"status": "ok", "deleted": True})
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User does not exist",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-
-@app.get("/users/me/", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
-    return current_user
-
-
-@app.get("/users/me/items/")
-async def read_own_items(current_user: User = Depends(get_current_active_user)):
-    return [{"item_id": "Foo", "owner": current_user.username}]
+@app.post("/upload")
+async def upload_picture_to_cloudinary_(pic: UploadFile = File(...)):
+    return upload_pic(pic)
 
 
 @app.get('/')

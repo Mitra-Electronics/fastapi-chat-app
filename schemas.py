@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Literal, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, HttpUrl
 
 
 class Token(BaseModel):
@@ -14,6 +14,9 @@ class TokenData(BaseModel):
 
 class UserUpdate(BaseModel):
     full_name: str
+    profile_pic_url: HttpUrl
+    gender: Literal['male', 'female', 'prefer not to say']
+    email: EmailStr
 
 
 class User(BaseModel):
@@ -21,10 +24,16 @@ class User(BaseModel):
     email: EmailStr
     full_name: str
     disabled: Optional[bool] = False
+    gender: Literal['male', 'female', 'prefer not to say']
 
 
 class UserSignup(User):
     password: str
+    profile_pic_url: HttpUrl
+
+
+class UserDisplay(User):
+    profile_pic_url: HttpUrl
 
 
 class UpdatePassword(BaseModel):
@@ -38,3 +47,4 @@ class UserLogin(BaseModel):
 
 class UserInDB(User):
     hashed_password: str
+    profile_pic_url: HttpUrl

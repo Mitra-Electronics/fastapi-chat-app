@@ -7,11 +7,11 @@ from functools import lru_cache
 def request():
     while True:
         try:
-            requests.get("https://www.google.com")
-            print("Requested google")
-        except ConnectionError:
             requests.get("https://www.youtube.com")
             print("Requested youtube")
+        except ConnectionError:
+            requests.get("https://www.google.com")
+            print("Requested google")
 
 
 def main():

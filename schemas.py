@@ -17,6 +17,7 @@ class UserUpdate(BaseModel):
     profile_pic_url: HttpUrl
     gender: Literal['male', 'female', 'prefer not to say']
     email: EmailStr
+    recovery_email: EmailStr
 
 
 class User(BaseModel):
@@ -25,15 +26,12 @@ class User(BaseModel):
     full_name: str
     disabled: Optional[bool] = False
     gender: Literal['male', 'female', 'prefer not to say']
+    recovery_email: EmailStr
+    profile_pic_url: HttpUrl
 
 
 class UserSignup(User):
     password: str
-    profile_pic_url: HttpUrl
-
-
-class UserDisplay(User):
-    profile_pic_url: HttpUrl
 
 
 class UpdatePassword(BaseModel):
@@ -47,4 +45,5 @@ class UserLogin(BaseModel):
 
 class UserInDB(User):
     hashed_password: str
-    profile_pic_url: HttpUrl
+    is_admin: bool
+    is_superuser: bool

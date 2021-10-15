@@ -3,22 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.param_functions import File
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.staticfiles import StaticFiles
 
-from cloudinary_driver import upload_pic
+from drivers.cloudinary_driver import upload_pic
 from config import (ACCESS_TOKEN_EXPIRE_MINUTES, ALLOW_CREDENTIALS,
                     DESCRIPTION, DOCS_URL, HEADERS, METHODS, NAME,
                     OAUTH2_REDIRRECT_URL, OPENAPI_URL, ORIGINS, REDOC_URL,
                     STATIC_DIR, STATIC_NAME, STATIC_URL, TOKEN_TEST_URL,
                     TOKEN_URL, USER_DISABLED_TEXT, USERS_PREFIX)
 from schemas import Token, UserLogin, UserSignup
-from users_router import route
+from routers.users_router import route
 from utils import (authenticate_user, create_access_token, fake_users_db__,
                    register_user)
 
 app = FastAPI(docs_url="/"+DOCS_URL, redoc_url="/"+REDOC_URL, openapi_url=OPENAPI_URL,
               swagger_ui_oauth2_redirect_url=OAUTH2_REDIRRECT_URL, title=NAME, description=DESCRIPTION)
-app.mount(STATIC_URL, StaticFiles(directory=STATIC_DIR), name=STATIC_NAME)
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,7 +35,7 @@ app.include_router(route, prefix=USERS_PREFIX)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     """Login"""
     user = authenticate_user(
-        fake_users_db__, form_data.username, form_data.password)
+        form_data.username, form_data.password)
     if not user:
 
         raise HTTPException(
@@ -66,7 +64,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 async def login_for_access_token(form_data: UserLogin):
     """Login"""
     user = authenticate_user(
-        fake_users_db__, form_data.username, form_data.password)
+        form_data.username, form_data.password)
     if not user:
 
         raise HTTPException(
@@ -93,10 +91,10 @@ async def login_for_access_token(form_data: UserLogin):
 @app.post("/register", response_model=Token)
 async def register_user_(user: UserSignup):
     user_create = register_user(
-        fake_users_db__, user, user.profile_pic_url, user.gender)
+        user, user.profile_pic_url, user.gender)
     if user_create is True:
         user = authenticate_user(
-            fake_users_db__, user.username, user.password)
+            user.username, user.password)
         if not user:
 
             raise HTTPException(

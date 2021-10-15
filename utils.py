@@ -9,7 +9,7 @@ from pydantic.networks import HttpUrl
 from config import (ALGORITHM, CREDENTIALS_EXCEPTION, DEPRECATED,
                     INACTIVE_EXCEPTION, LOGIN_FORM_TITLE, PEPPER, SCHEMES,
                     SECRET_KEY, TOKEN_TEST_URL, USER_DISABLED_TEXT)
-from mongodb_driver import delete, fake_users_db__, insert__, update_password, update_user_in_db__, get_user
+from drivers.mongodb_driver import delete, fake_users_db__, insert__, update_password, update_user_in_db__, get_user
 from schemas import TokenData, User, UserInDB, UserSignup, UserUpdate
 
 pwd_context = CryptContext(schemes=SCHEMES, deprecated=DEPRECATED)
@@ -26,8 +26,8 @@ def get_password_hash(password: str):
     return pwd_context.hash(password)
 
 
-def authenticate_user(fake_db: fake_users_db__, username: str, password: str):
-    user = get_user(fake_db, username)
+def authenticate_user(username: str, password: str):
+    user = get_user(username)
     if not user:
         return False
     if not verify_password(password+PEPPER, user.hashed_password):
@@ -54,7 +54,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         token_data = TokenData(username=username)
     except JWTError:
         raise CREDENTIALS_EXCEPTION
-    user = get_user(fake_users_db__, username=token_data.username)
+    user = get_user(username=token_data.username)
     if user is None:
         raise CREDENTIALS_EXCEPTION
     return user
@@ -66,17 +66,17 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     return current_user
 
 
-def register_user(fake_db: fake_users_db__, user: UserSignup, url: HttpUrl,gender: str) -> bool:
-    if not get_user(fake_db, user.username, user.email):
+def register_user(user: UserSignup, url: HttpUrl,gender: str) -> bool:
+    if not get_user(user.username, user.email):
         insert__(user.username, get_password_hash(
-            user.password+PEPPER), user.full_name, user.email, url, gender)
+            user.password+PEPPER), user.full_name, user.email, url, gender, user.recovery_email)
         return True
     else:
         return False
 
 
-def change_password(fake_db: fake_users_db__, username: str, email: str, updated_password: str):
-    if get_user(fake_db, username, email):
+def change_password(username: str, email: str, updated_password: str):
+    if get_user(username, email):
         update_password(username, email, get_password_hash(
             updated_password+PEPPER))
 
@@ -85,8 +85,8 @@ def change_password(fake_db: fake_users_db__, username: str, email: str, updated
         return False
 
 
-def change_user_in_db(fake_db: fake_users_db__, username: str, email: str, update: UserUpdate):
-    if get_user(fake_db, username, email):
+def change_user_in_db(username: str, email: str, update: UserUpdate):
+    if get_user(username, email):
         update_user_in_db__(username, email, update)
 
         return True
@@ -94,8 +94,8 @@ def change_user_in_db(fake_db: fake_users_db__, username: str, email: str, updat
         return False
 
 
-def delete_user(db: fake_users_db__, user: UserInDB):
-    if get_user(db, user.username, user.email):
+def delete_user(user: UserInDB):
+    if get_user(user.username, user.email):
         delete(user)
         return True
     else:

@@ -9,7 +9,7 @@ db_ = client.get_database(MONGO_DB_DATABASE)
 fake_users_db__ = db_.users
 
 
-def insert__(username: str, password: str, full_name: str, email: str, url: HttpUrl, gender: str):
+def insert__(username: str, password: str, full_name: str, email: str, url: HttpUrl, gender: str, recovery: EmailStr):
     fake_users_db__.insert_one({
         "username": username,
         "full_name": full_name,
@@ -18,6 +18,9 @@ def insert__(username: str, password: str, full_name: str, email: str, url: Http
         "profile_pic_url": url,
         "disabled": False,
         "gender": gender,
+        "recovery_email": recovery,
+        "is_admin": False,
+        "is_superuser": False
     })
 
 
@@ -36,12 +39,12 @@ def update_user_in_db__(username: str, email: EmailStr, user: UserUpdate):
                                "$set": {"full_name": user.full_name, "email": user.email, "profile_pic_url": user.profile_pic_url, "gender": user.gender}})
 
 
-def get_user(db: fake_users_db__, username: str, email=None):
+def get_user(username: str, email=None):
     if email is None:
         search = {"username": username}
     else:
         search = {"username": username, "email": email}
-    search = list(db.find(search))
+    search = list(fake_users_db__.find(search))
     if search != []:
         user_dict = search[0]
         return UserInDB(**user_dict)

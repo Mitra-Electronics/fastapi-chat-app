@@ -12,7 +12,7 @@ from config import (ACCESS_TOKEN_EXPIRE_MINUTES, ALLOW_CREDENTIALS,
                     TOKEN_URL, USER_DISABLED_TEXT, USERS_PREFIX)
 from schemas import Token, UserLogin, UserSignup
 from routers.users_router import route
-from utils import (authenticate_user, create_access_token, fake_users_db__,
+from utils import (authenticate_user, create_access_token,
                    register_user)
 
 app = FastAPI(docs_url="/"+DOCS_URL, redoc_url="/"+REDOC_URL, openapi_url=OPENAPI_URL,

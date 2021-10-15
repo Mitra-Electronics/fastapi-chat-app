@@ -40,7 +40,8 @@ ALLOW_CREDENTIALS = True
 
 #Users Router Config
 USERS_TAGS = ["Users"]
-USERS_PREFIX = "/users/me"
+USERS_PREFIX = "/users"
+USERS_ME_PREFIX = "/me"
 
 #Url Config
 TOKEN_URL = "login"

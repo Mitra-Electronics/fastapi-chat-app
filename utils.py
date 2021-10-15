@@ -9,7 +9,7 @@ from pydantic.networks import HttpUrl
 from config import (ALGORITHM, CREDENTIALS_EXCEPTION, DEPRECATED,
                     INACTIVE_EXCEPTION, LOGIN_FORM_TITLE, PEPPER, SCHEMES,
                     SECRET_KEY, TOKEN_TEST_URL, USER_DISABLED_TEXT)
-from drivers.mongodb_driver import delete, fake_users_db__, insert__, update_password, update_user_in_db__, get_user
+from drivers.mongodb_driver import delete, insert__, update_password, update_user_in_db__, get_user
 from schemas import TokenData, User, UserInDB, UserSignup, UserUpdate
 
 pwd_context = CryptContext(schemes=SCHEMES, deprecated=DEPRECATED)

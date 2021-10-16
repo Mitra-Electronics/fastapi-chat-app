@@ -53,7 +53,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
     access_token = create_access_token(
 
-        data={"sub": user.username}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
+        data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
 
     )
 
@@ -64,7 +64,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 async def login_for_access_token(form_data: UserLogin):
     """Login"""
     user = authenticate_user(
-        form_data.username, form_data.password)
+        form_data.email, form_data.password)
     if not user:
 
         raise HTTPException(
@@ -81,7 +81,7 @@ async def login_for_access_token(form_data: UserLogin):
         )
     access_token = create_access_token(
 
-        data={"sub": user.username}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
+        data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
 
     )
 
@@ -94,7 +94,7 @@ async def register_user_(user: UserSignup):
         user, user.profile_pic_url, user.gender)
     if user_create is True:
         user = authenticate_user(
-            user.username, user.password)
+            user.email, user.password)
         if not user:
 
             raise HTTPException(
@@ -111,7 +111,7 @@ async def register_user_(user: UserSignup):
             )
 
         access_token = create_access_token(
-            data={"sub": user.username}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
+            data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
         return JSONResponse({"access_token": access_token, "token_type": "bearer"})

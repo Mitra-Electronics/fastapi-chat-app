@@ -9,7 +9,7 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    email: Optional[EmailStr] = None
 
 
 class UserUpdate(BaseModel):
@@ -21,7 +21,6 @@ class UserUpdate(BaseModel):
 
 
 class User(BaseModel):
-    username: str
     email: EmailStr
     full_name: str
     disabled: Optional[bool] = False
@@ -39,7 +38,7 @@ class UpdatePassword(BaseModel):
 
 
 class UserLogin(BaseModel):
-    username: str
+    email: EmailStr
     password: str
 
 

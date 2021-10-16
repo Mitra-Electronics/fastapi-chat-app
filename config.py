@@ -40,6 +40,7 @@ ALLOW_CREDENTIALS = True
 
 #Users Router Config
 USERS_TAGS = ["Users"]
+USERS_ME_TAGS = ["Me"]
 USERS_PREFIX = "/users"
 USERS_ME_PREFIX = "/me"
 
@@ -52,7 +53,9 @@ STATIC_URL = "/static"
 STATIC_DIR = "static"
 STATIC_NAME = "static"
 
+#Text Config
 USER_DISABLED_TEXT = "Disabled"
+EMAIL_EXISTS_TEXT = "Email exists"
 
 #Exceptions Config
 CREDENTIALS_EXCEPTION = HTTPException(

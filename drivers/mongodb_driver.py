@@ -9,9 +9,8 @@ db_ = client.get_database(MONGO_DB_DATABASE)
 fake_users_db__ = db_.users
 
 
-def insert__(username: str, password: str, full_name: str, email: str, url: HttpUrl, gender: str, recovery: EmailStr):
+def insert__(password: str, full_name: str, email: str, url: HttpUrl, gender: str, recovery: EmailStr):
     fake_users_db__.insert_one({
-        "username": username,
         "full_name": full_name,
         "email": email,
         "hashed_password": password,
@@ -24,27 +23,27 @@ def insert__(username: str, password: str, full_name: str, email: str, url: Http
     })
 
 
-def update_password(username: str, email: EmailStr, password: str):
-    fake_users_db__.update_one({"username": username, "email": email}, {
+def update_password(email: EmailStr, password: str):
+    fake_users_db__.update_one({"email": email}, {
                                "$set": {"hashed_password": password}})
 
 
 def delete(user: User):
     fake_users_db__.delete_one(
-        {"username": user.username, "email": user.email, "disabled": user.disabled, "full_name": user.full_name})
+        {"email": user.email, "disabled": user.disabled, "full_name": user.full_name})
 
-
-def update_user_in_db__(username: str, email: EmailStr, user: UserUpdate):
-    fake_users_db__.update_one({"username": username, "email": email}, {
-                               "$set": {"full_name": user.full_name, "email": user.email, "profile_pic_url": user.profile_pic_url, "gender": user.gender}})
-
-
-def get_user(username: str, email=None):
-    if email is None:
-        search = {"username": username}
-    else:
-        search = {"username": username, "email": email}
-    search = list(fake_users_db__.find(search))
+def get_user(email: EmailStr):
+    search = list(fake_users_db__.find({"email":email}))
     if search != []:
         user_dict = search[0]
         return UserInDB(**user_dict)
+
+
+def update_user_in_db__(email: EmailStr, user: UserUpdate):
+    if not get_user(user.email):
+        fake_users_db__.update_one({"email": email}, {
+                               "$set": {"full_name": user.full_name, "email": user.email, "profile_pic_url": user.profile_pic_url, "gender": user.gender}})
+        return True
+    else:
+        return False
+

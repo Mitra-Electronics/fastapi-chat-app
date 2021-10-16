@@ -3,7 +3,7 @@ from json import loads, dumps
 
 sess = session()
 login_json = {
-    "username": "string2",
+      "email": "user@example.com",
     "password": "string"
 }
 
@@ -21,7 +21,6 @@ login_json = dumps(login_json)
 change_json = dumps(change_json)
 
 register_json = dumps({
-      "username": "string2",
       "email": "user@example.com",
       "full_name": "string",
       "disabled": False,

@@ -26,7 +26,7 @@ def get_password_hash(password: str):
     return pwd_context.hash(password)
 
 
-def authenticate_user(email: EmailStr, password: str):
+def authenticate_user(email: EmailStr, password: str) -> bool or USER_DISABLED_TEXT:
     user = get_user(email)
     if not user:
         return False
@@ -37,7 +37,7 @@ def authenticate_user(email: EmailStr, password: str):
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta):
+def create_access_token(data: dict, expires_delta: timedelta) -> str:
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
@@ -86,7 +86,7 @@ def change_password(email: EmailStr, updated_password: str):
         return False
 
 
-def change_user_in_db(email: str, update: UserUpdate):
+def change_user_in_db(email: str, update: UserUpdate) -> bool or EMAIL_EXISTS_TEXT:
     if get_user(email):
         if update_user_in_db__(email, update) is True:
             return True
@@ -96,7 +96,7 @@ def change_user_in_db(email: str, update: UserUpdate):
         return False
 
 
-def delete_user(user: UserInDB):
+def delete_user(user: UserInDB) -> bool:
     if get_user(user.email):
         delete(user)
         return True

@@ -8,7 +8,7 @@ from config import CLOUDINARY_CLOUD_API_KEY, CLOUDINARY_CLOUD_NAME, CLOUDINARY_C
 cloudinary.config(cloud_name=CLOUDINARY_CLOUD_NAME,
                   api_key=CLOUDINARY_CLOUD_API_KEY, api_secret=CLOUDINARY_CLOUD_API_SECRET)
 
-def upload_pic(pic: UploadFile):
+def upload_pic(pic: UploadFile) -> str:
     if pic.filename.endswith(".jpg") or pic.filename.endswith(".png"):
             result = uploader.upload(pic.file)
             url = result.get("url")

@@ -20,13 +20,16 @@ class UserUpdate(BaseModel):
     recovery_email: EmailStr
 
 
-class User(BaseModel):
+class UserDisplay(BaseModel):
     email: EmailStr
     full_name: str
     disabled: Optional[bool] = False
     gender: Literal['male', 'female', 'prefer not to say']
-    recovery_email: EmailStr
     profile_pic_url: HttpUrl
+
+
+class User(UserDisplay):
+    recovery_email: EmailStr
 
 
 class UserSignup(User):

@@ -2,7 +2,7 @@ from pydantic.networks import EmailStr, HttpUrl
 import pymongo
 
 from config import MONGO_DB_DATABASE, MONGO_DB_URL
-from schemas import User, UserInDB, UserUpdate
+from schemas import User, UserDisplay, UserInDB, UserUpdate
 
 client = pymongo.MongoClient(MONGO_DB_URL)
 db_ = client.get_database(MONGO_DB_DATABASE)
@@ -46,4 +46,8 @@ def update_user_in_db__(email: EmailStr, user: UserUpdate):
         return True
     else:
         return False
+
+
+def search_user_in_db(name: str):
+    return list(fake_users_db__.find({"full_name":{"$regex":name}}))
 

@@ -1,9 +1,10 @@
+from json import dumps, loads
+
 from requests import session
-from json import loads, dumps
 
 sess = session()
 login_json = {
-      "email": "user@example.com",
+    "email": "user@example.com",
     "password": "string"
 }
 
@@ -13,30 +14,30 @@ change_json = {
 
 name_change = dumps({"full_name": "Ishan Mitra",
                      "gender": "female",
-                    "email": "ishanmitra020@gmail.com",
+                     "email": "ishanmitra020@gmail.com",
                      "profile_pic_url": "http://cloudinary.com",
-                     "recovery_email":"ishanmitra020@gmail.com"})
+                     "recovery_email": "ishanmitra020@gmail.com"})
 
 login_json = dumps(login_json)
 change_json = dumps(change_json)
 
 register_json = dumps({
-      "email": "user@example.com",
-      "full_name": "string",
-      "disabled": False,
-      "password": "string",
-      "profile_pic_url": "http://cloudinary.com",
-      "gender": "male",
-      "recovery_email":"ishanmitra020@gmail.com"
-      })
+    "email": "user@example.com",
+    "full_name": "string",
+    "disabled": False,
+    "password": "string",
+    "profile_pic_url": "http://cloudinary.com",
+    "gender": "male",
+    "recovery_email": "ishanmitra020@gmail.com"
+})
 
 print(sess.post("http://127.0.0.1:8000/register", data=register_json,
-                  headers={"Content-Type": "application/json"}).text)
+                headers={"Content-Type": "application/json"}).text)
 
 res = sess.post("http://127.0.0.1:8000/login", data=login_json,
                 headers={"Content-Type": "application/json"}, allow_redirects=True).text
 
-print(res)#
+print(res)
 
 token = loads(res)['access_token']
 
@@ -51,4 +52,3 @@ print(sess.post("http://127.0.0.1:8000/users/me/change", data=name_change,
 
 """print(sess.post("http://127.0.0.1:8000/users/me/delete-user",
      headers={"Content-Type": "application/json", 'Authorization': f'Bearer {token}'}).text)"""
-

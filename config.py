@@ -20,7 +20,7 @@ SCHEMES = ["bcrypt"]
 DEPRECATED = "auto"
 
 #MongoDb Config
-MONGO_DB_URL = "mongodb+srv://main:main@cluster0.me4b4.mongodb.net/myFirstDatabase?retryWrites=true&w=majorityssl=true&ssl_cert_reqs=CERT_NONE"
+MONGO_DB_URL = "mongodb+srv://main:main@cluster0.me4b4.mongodb.net/myFirstDatabase?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE"
 #MONGO_DB_URL = "mongodb://localhost:27017"
 #MONGO_DB_URL = "mongodb+srv://main:Esa?XD6GyTCY7ktQ@iot.me4b4.mongodb.net/iot_proj?retryWrites=true&w=majority"
 MONGO_DB_DATABASE = "iot"

@@ -1,5 +1,6 @@
 from pydantic.networks import EmailStr, HttpUrl
 import pymongo
+from datetime import datetime
 
 from config import MONGO_DB_DATABASE, MONGO_DB_URL
 from schemas import User, UserDisplay, UserInDB, UserUpdate
@@ -18,6 +19,7 @@ def insert__(password: str, full_name: str, email: str, url: HttpUrl, gender: st
         "disabled": False,
         "gender": gender,
         "recovery_email": recovery,
+        "joining_date":datetime.utcnow().strftime("%d-%m-%Y"),
         "is_admin": False,
         "is_superuser": False
     })

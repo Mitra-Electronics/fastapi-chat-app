@@ -47,5 +47,6 @@ class UserLogin(BaseModel):
 
 class UserInDB(User):
     hashed_password: str
+    joining_date: str
     is_admin: bool
     is_superuser: bool

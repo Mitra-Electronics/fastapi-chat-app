@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic.networks import EmailStr, HttpUrl
+from datetime import datetime
 
 from config import (ALGORITHM, CREDENTIALS_EXCEPTION, DEPRECATED,
                     INACTIVE_EXCEPTION, LOGIN_FORM_TITLE, PEPPER, SCHEMES,
@@ -68,7 +69,6 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
 
 def register_user(user: UserSignup, url: HttpUrl,gender: str) -> bool:
     if not get_user(user.email):
-        print(get_user(user.email))
         insert__(get_password_hash(
             user.password+PEPPER), user.full_name, user.email, url, gender, user.recovery_email)
         return True

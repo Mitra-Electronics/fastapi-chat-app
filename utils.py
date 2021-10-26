@@ -3,29 +3,18 @@ from datetime import datetime, timedelta
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from pydantic.networks import EmailStr, HttpUrl
 from datetime import datetime
 
-from config import (ALGORITHM, CREDENTIALS_EXCEPTION, DEPRECATED,
-                    INACTIVE_EXCEPTION, LOGIN_FORM_TITLE, PEPPER, SCHEMES,
+from config import (ALGORITHM, CREDENTIALS_EXCEPTION,
+                    INACTIVE_EXCEPTION, LOGIN_FORM_TITLE, PEPPER,
                     SECRET_KEY, TOKEN_TEST_URL, USER_DISABLED_TEXT, EMAIL_EXISTS_TEXT)
 from drivers.mongodb_driver import delete, insert__, update_password, update_user_in_db__, get_user
 from schemas import TokenData, User, UserInDB, UserSignup, UserUpdate
-
-pwd_context = CryptContext(schemes=SCHEMES, deprecated=DEPRECATED)
+from crud.passlib_crud import verify_password, get_password_hash
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=TOKEN_TEST_URL, scheme_name=LOGIN_FORM_TITLE)
-
-
-def verify_password(plain_password: str, hashed_password: str):
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password: str):
-    return pwd_context.hash(password)
-
 
 def authenticate_user(email: EmailStr, password: str) -> bool or USER_DISABLED_TEXT:
     user = get_user(email)

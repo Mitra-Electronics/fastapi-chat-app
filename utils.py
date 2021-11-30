@@ -16,7 +16,7 @@ from crud.passlib_crud import verify_password, get_password_hash
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=TOKEN_TEST_URL, scheme_name=LOGIN_FORM_TITLE)
 
-def authenticate_user(email: EmailStr, password: str) -> bool or USER_DISABLED_TEXT:
+def authenticate_user(email: EmailStr, password: str) -> bool or USER_DISABLED_TEXT or UserInDB:
     user = get_user(email)
     if not user:
         return False

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from utils import get_current_active_user, delete_user, change_user_in_db, change_password
 from fastapi.responses import JSONResponse
 from schemas import UserUpdate, User, UpdatePassword
+from crud.recovery_crud import verify as verify_
 from config import USERS_ME_TAGS, EMAIL_EXISTS_TEXT
 
 me = APIRouter(tags=USERS_ME_TAGS)
@@ -27,6 +28,10 @@ async def change_user(user: UserUpdate, current_user: User = Depends(get_current
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+@me.get("/verify")
+async def verify(token: str):
+    verify_(token)
+    return {"sucess":True}
 
 @me.post("/delete-user")
 async def delete_user_(current_user: User = Depends(get_current_active_user)):

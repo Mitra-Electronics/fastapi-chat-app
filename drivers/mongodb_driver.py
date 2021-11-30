@@ -16,7 +16,7 @@ def insert__(password: str, full_name: str, email: str, url: HttpUrl, gender: st
         "email": email,
         "hashed_password": password,
         "profile_pic_url": url,
-        "disabled": False,
+        "disabled": True,
         "gender": gender,
         "recovery_email": recovery,
         "joining_date":datetime.utcnow().strftime("%d-%m-%Y"),
@@ -49,6 +49,9 @@ def update_user_in_db__(email: EmailStr, user: UserUpdate) -> bool:
     else:
         return False
 
+def update_disabled(email):
+    fake_users_db__.update_one({"email": email}, {
+                               "$set":{"disabled":False}})
 
 def search_user_in_db(name: str) -> list:
     return list(fake_users_db__.find({"full_name":{"$regex":name}}))

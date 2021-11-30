@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.param_functions import File
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from crud.recovery_crud import create_token
 
 from drivers.cloudinary_driver import upload_pic
 from config import (ACCESS_TOKEN_EXPIRE_MINUTES, ALLOW_CREDENTIALS,
@@ -31,7 +32,7 @@ app.include_router(route, prefix=USERS_PREFIX)
 # openssl rand -hex 32
 
 
-@app.post("/"+TOKEN_TEST_URL, response_model=Token)
+@app.post("/"+TOKEN_TEST_URL)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     """Login"""
     user = authenticate_user(
@@ -60,28 +61,19 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return JSONResponse({"access_token": access_token, "token_type": "bearer"})
 
 
-@app.post("/"+TOKEN_URL, response_model=Token)
+@app.post("/"+TOKEN_URL)
 async def login_for_access_token(form_data: UserLogin):
     """Login"""
     user = authenticate_user(
         form_data.email, form_data.password)
     if not user:
 
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-
-        )
+        return {"sucess":False, "detail":"Incorrect username or password"}
     if user == USER_DISABLED_TEXT:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User is disabled",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        return {"sucess":False, "detail":"Incorrect username or password"}
     access_token = create_access_token({"sub": user.email}, ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    return JSONResponse({"access_token": access_token, "token_type": "bearer"})
+    return JSONResponse({"access_token": access_token, "token_type": "bearer", "sucess":True})
 
 
 @app.post("/register", response_model=Token)
@@ -89,9 +81,9 @@ async def register_user_(user: UserSignup):
     user_create = register_user(
         user, user.profile_pic_url, user.gender)
     if user_create is True:
-        user = authenticate_user(
+        _user = authenticate_user(
             user.email, user.password)
-        if not user:
+        if not _user:
 
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -99,18 +91,15 @@ async def register_user_(user: UserSignup):
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        if user == USER_DISABLED_TEXT:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="User is disabled",
-                headers={"WWW-Authenticate": "Bearer"},
+        if _user == USER_DISABLED_TEXT:
+            await create_token(user.email)
+
+        else:
+            access_token = create_access_token(
+                data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
             )
 
-        access_token = create_access_token(
-            data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
-        )
-
-        return JSONResponse({"access_token": access_token, "token_type": "bearer"})
+        return JSONResponse({"access_token": "sent", "token_type": "bearer"})
     else:
         raise HTTPException(
             status_code=status.HTTP_226_IM_USED,

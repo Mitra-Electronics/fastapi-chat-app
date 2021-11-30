@@ -6,6 +6,7 @@ from pydantic import BaseModel, EmailStr, HttpUrl
 class Token(BaseModel):
     access_token: str
     token_type: str
+    sucess: Optional[bool]
 
 
 class TokenData(BaseModel):
@@ -32,7 +33,12 @@ class User(UserDisplay):
     recovery_email: EmailStr
 
 
-class UserSignup(User):
+class UserSignup(BaseModel):
+    email: EmailStr
+    full_name: str
+    gender: Literal['male', 'female', 'prefer not to say']
+    profile_pic_url: HttpUrl
+    recovery_email: EmailStr
     password: str
 
 

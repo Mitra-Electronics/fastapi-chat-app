@@ -33,6 +33,7 @@ CLOUDINARY_CLOUD_API_SECRET = "6KGsJIlQbcGwU_irAEviB8fzYeQ"
 # CORSMiddleware Config
 ORIGINS = [
     "http://localhost:3000",
+    "http://192.168.0.126:3000"
 ]
 METHODS = ["GET", "POST"]
 HEADERS = ["*"]
